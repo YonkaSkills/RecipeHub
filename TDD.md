@@ -23,35 +23,6 @@ Authentication: JWT (JSON Web Tokens)
 | GET        | `/api/mealplan`      | Retrieve the user's weekly meal plan.                 |
 | GET        | `/api/shopping-list` | Generate a shopping list from the selected meal plan. |
 
-model User {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique
-  password   String
-  recipes    Recipe[]
-  mealPlans  MealPlan[]
-}
-
-model Recipe {
-  id           Int      @id @default(autoincrement())
-  title        String
-  ingredients  String
-  instructions String
-  category     String
-  cookingTime  Int
-  servings     Int
-  userId       Int
-  user         User     @relation(fields: [userId], references: [id])
-}
-
-model MealPlan {
-  id        Int      @id @default(autoincrement())
-  day       String
-  recipeId  Int
-  userId    Int
-  user       User     @relation(fields: [userId], references: [id])
-  recipe     Recipe   @relation(fields: [recipeId], references: [id])
-}
-
 
 
 D. Implementation Strategy
