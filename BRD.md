@@ -8,23 +8,22 @@
 # 1. Introduction
 
 ## 1.1 Purpose
-The purpose of RecipeHub is to provide users with a web-based platform to save, organize, and manage recipes. Users can categorize recipes, create weekly meal plans, and automatically generate shopping lists based on selected recipes.
+RecipeHub is a web-based application that allows users to save, organize, and manage their favorite recipes. The application helps users categorize recipes, search for recipes, mark favorites, and generate a shopping list from selected recipes.
 
 ## 1.2 Scope
 The system allows users to:
-- Register and log in securely.
-- Manage personal recipes.
+- Register and log in.
+- Add, edit, and delete recipes.
 - Organize recipes into categories.
-- Plan weekly meals.
-- Generate shopping lists automatically.
+- Search recipes by name.
 - Save favorite recipes.
-- Search and filter recipes.
+- Generate a shopping list.
 
 ---
 
 # 2. Business Objective
 
-The objective of RecipeHub is to simplify meal planning and grocery shopping by providing an easy-to-use platform for organizing recipes and creating shopping lists based on weekly meal plans.
+The objective of RecipeHub is to provide a simple and user-friendly platform for organizing recipes and making meal preparation easier.
 
 ---
 
@@ -36,17 +35,16 @@ The objective of RecipeHub is to simplify meal planning and grocery shopping by 
 The system shall provide secure user authentication.
 
 ### Requirements
-- Users can register with their email and password.
+- Users can register with an email and password.
 - Users can log in securely.
-- Users can log out.
-- Passwords must be encrypted using BCrypt.
+- Users can log out of the application.
 
 ---
 
 ## 3.2 Recipe Management
 
 ### Description
-The system shall allow users to manage recipes.
+The system shall allow users to manage their recipes.
 
 ### Requirements
 - Add new recipes.
@@ -57,72 +55,36 @@ The system shall allow users to manage recipes.
 ### Recipe Information
 - Recipe Name
 - Ingredients
-- Cooking Instructions
-- Preparation Time
-- Cooking Time
-- Serving Size
-- Recipe Image (Optional)
+- Instructions
+- Category
 
 ---
 
-## 3.3 Recipe Categorization
+## 3.3 Recipe Categories
 
 ### Description
-The system shall organize recipes into categories.
+The system shall organize recipes into different categories.
 
 ### Categories
 - Breakfast
 - Lunch
 - Dinner
 - Snacks
-- Vegan
-- Vegetarian
-- Desserts
-- Beverages
 
 ---
 
-## 3.4 Search & Filter
+## 3.4 Search Recipes
 
 ### Description
-The system shall allow users to search and filter recipes.
+The system shall allow users to search for recipes.
 
 ### Requirements
-- Search by recipe name.
-- Search by ingredients.
-- Search by category.
-- Filter by meal type.
-- Filter by dietary preference.
-- Filter by preparation time.
+- Search recipes by name.
+- View recipes by category.
 
 ---
 
-## 3.5 Weekly Meal Planner
-
-### Description
-The system shall allow users to create weekly meal plans.
-
-### Requirements
-- Assign recipes to each day.
-- Update meal plans.
-- Remove meal plans.
-- View weekly schedule.
-
----
-
-## 3.6 Shopping List Generator
-
-### Description
-The system shall automatically generate shopping lists.
-
-### Requirements
-- Combine duplicate ingredients.
-- Display required quantities.
-- Allow users to mark purchased items.
-
----
-
-## 3.7 Favorites
+## 3.5 Favorites
 
 ### Description
 The system shall allow users to manage favorite recipes.
@@ -134,20 +96,30 @@ The system shall allow users to manage favorite recipes.
 
 ---
 
+## 3.6 Shopping List
+
+### Description
+The system shall generate a shopping list from a selected recipe.
+
+### Requirements
+- Display all ingredients required for the recipe.
+- Allow users to mark purchased ingredients.
+
+---
+
 # 4. Non-Functional Requirements
 
 ## 4.1 Security
 
-- Passwords must be hashed using BCrypt.
-- JWT authentication must be implemented.
-- Only authenticated users can access personal data.
+- User passwords must be securely encrypted.
+- Only authenticated users can access their personal recipes.
 
 ---
 
 ## 4.2 Performance
 
 - Recipe searches should complete within 2 seconds.
-- Meal planner should load within 2 seconds.
+- Recipe details should load quickly.
 - Shopping list generation should complete within 2 seconds.
 
 ---
@@ -161,19 +133,10 @@ The application must support:
 
 ---
 
-## 4.4 Scalability
-
-The application must:
-- Support thousands of recipes.
-- Handle concurrent users efficiently.
-- Maintain good performance as the database grows.
-
----
-
-## 4.5 Usability
+## 4.4 Usability
 
 The application should:
-- Have an intuitive interface.
+- Have a simple and user-friendly interface.
 - Be easy to navigate.
 - Be suitable for users of all experience levels.
 
@@ -182,7 +145,7 @@ The application should:
 # 5. Assumptions
 
 - Users have internet access.
-- Users use modern web browsers.
+- Users use a modern web browser.
 - Recipe data is stored securely in the database.
 
 ---
@@ -190,7 +153,7 @@ The application should:
 # 6. Constraints
 
 - Internet connection is required.
-- User authentication is mandatory.
+- Users must log in to manage recipes.
 - The system depends on database availability.
 
 ---
@@ -198,10 +161,11 @@ The application should:
 # 7. Success Criteria
 
 The project is considered successful if:
-- Users can manage recipes successfully.
-- Weekly meal planning works correctly.
-- Shopping lists are generated accurately.
-- The application performs within expected response times.
-- Users can access the application on desktop and mobile devices.
+- Users can register and log in successfully.
+- Users can add, edit, and delete recipes.
+- Users can search recipes by name or category.
+- Users can save favorite recipes.
+- Users can generate a shopping list.
+- The application works correctly on desktop and mobile devices.
 
 ---
