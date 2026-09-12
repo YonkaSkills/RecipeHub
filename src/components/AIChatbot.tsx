@@ -10,17 +10,11 @@ import {
   Copy,
   Check,
   ChefHat,
-  Key,
   GripHorizontal,
-  RefreshCw,
-  AlertCircle,
-  ExternalLink,
 } from "lucide-react";
 import {
   sendToGemini,
   getActiveApiKey,
-  saveApiKeyToLocalStorage,
-  PRIMARY_MODEL,
   type ChatMessage,
 } from "@/lib/gemini";
 import { Button } from "@/components/ui/button";
@@ -53,21 +47,16 @@ export function AIChatbot() {
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [apiKey, setApiKey] = useState("");
-  const [showKeyModal, setShowKeyModal] = useState(false);
-  const [tempApiKey, setTempApiKey] = useState("");
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [activeModelName, setActiveModelName] = useState(PRIMARY_MODEL);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "welcome-msg",
       role: "model",
-      text: "👋 Hi there! I'm **Chef Hub**, your personal culinary AI powered by **Gemini 3.1 Flash Lite**.\n\nAsk me for custom recipes, ingredient substitutions, meal prep strategies, or cooking tips!",
+      text: "👋 Hi there! I'm **Chef Hub**, your personal culinary AI assistant.\n\nAsk me for custom recipes, ingredient substitutions, meal prep strategies, or cooking tips!",
       timestamp: new Date(),
-      modelUsed: PRIMARY_MODEL,
     },
   ]);
 
@@ -77,9 +66,6 @@ export function AIChatbot() {
   // SSR hydration safety
   useEffect(() => {
     setMounted(true);
-    const key = getActiveApiKey();
-    setApiKey(key);
-    setTempApiKey(key);
   }, []);
 
   // Auto-scroll to bottom of messages
@@ -102,12 +88,6 @@ export function AIChatbot() {
     const query = (textToSend || inputMessage).trim();
     if (!query || isLoading) return;
 
-    const currentKey = getActiveApiKey();
-    if (!currentKey) {
-      setShowKeyModal(true);
-      return;
-    }
-
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
       role: "user",
@@ -120,41 +100,46 @@ export function AIChatbot() {
     setInputMessage("");
     setIsLoading(true);
 
+    const activeKey = getActiveApiKey();
+    if (!activeKey) {
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `bot-${Date.now()}`,
+            role: "model",
+            text: "The culinary assistant is currently taking a short break. Please check back shortly!",
+            timestamp: new Date(),
+          },
+        ]);
+        setIsLoading(false);
+      }, 600);
+      return;
+    }
+
     try {
       const response = await sendToGemini(newHistory);
-      setActiveModelName(response.modelUsed);
 
       const botMessage: ChatMessage = {
         id: `bot-${Date.now()}`,
         role: "model",
         text: response.text,
         timestamp: new Date(),
-        modelUsed: response.modelUsed,
       };
 
       setMessages((prev) => [...prev, botMessage]);
     } catch (err: any) {
-      console.error("Error communicating with Gemini:", err);
-      const isMissingKey =
-        err.message?.includes("MISSING_API_KEY") ||
-        err.message?.includes("API_KEY_INVALID") ||
-        err.message?.includes("API key not valid");
+      console.error("Error communicating with AI assistant:", err);
 
       const errorMessage: ChatMessage = {
         id: `err-${Date.now()}`,
         role: "model",
-        text: isMissingKey
-          ? "⚠️ **Gemini API Key Required**\nPlease paste your Gemini API key in `src/lib/gemini.ts` or click the key icon 🔑 in the header to enter it."
-          : `⚠️ **Error generating response:**\n${err.message || "Something went wrong. Please check your network or API key."}`,
+        text: "I'm having a little trouble connecting to the kitchen right now. Please try again in a moment.",
         timestamp: new Date(),
         error: true,
       };
 
       setMessages((prev) => [...prev, errorMessage]);
-
-      if (isMissingKey) {
-        setShowKeyModal(true);
-      }
     } finally {
       setIsLoading(false);
     }
@@ -180,15 +165,8 @@ export function AIChatbot() {
         role: "model",
         text: "🧹 Conversation cleared! How can Chef Hub assist your cooking today?",
         timestamp: new Date(),
-        modelUsed: activeModelName,
       },
     ]);
-  };
-
-  const handleSaveApiKey = () => {
-    saveApiKeyToLocalStorage(tempApiKey);
-    setApiKey(tempApiKey);
-    setShowKeyModal(false);
   };
 
   // Simple Markdown-style formatter (handles headers, bold, bullets, numbered lists, linebreaks)
@@ -346,7 +324,7 @@ export function AIChatbot() {
           {!isOpen && (
             <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 hidden md:group-hover:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/95 text-foreground text-xs font-medium shadow-lg border border-border/80 whitespace-nowrap backdrop-blur-md pointer-events-none transition-all">
               <Sparkles className="w-3.5 h-3.5 text-primary" />
-              <span>Ask Chef Hub (Gemini AI)</span>
+              <span>Ask Chef Hub</span>
               <span className="text-[10px] text-muted-foreground ml-1">· Draggable</span>
             </div>
           )}
@@ -376,12 +354,7 @@ export function AIChatbot() {
                   <Sparkles className="w-3 h-3 text-amber-300 absolute -bottom-0.5 -right-0.5" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="font-display font-bold text-sm text-foreground">Chef Hub</h3>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/15 text-primary font-semibold border border-primary/20">
-                      Gemini 3.1 Flash Lite
-                    </span>
-                  </div>
+                  <h3 className="font-display font-bold text-sm text-foreground">Chef Hub</h3>
                   <p className="text-[11px] text-muted-foreground flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
                     Culinary AI Assistant
@@ -391,20 +364,6 @@ export function AIChatbot() {
 
               {/* Header Action Controls */}
               <div className="flex items-center gap-1">
-                {/* API Key Modal Button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "w-8 h-8 rounded-full text-muted-foreground hover:text-foreground",
-                    !getActiveApiKey() && "text-amber-500 bg-amber-500/10 hover:bg-amber-500/20"
-                  )}
-                  onClick={() => setShowKeyModal(true)}
-                  title="API Key Configuration"
-                >
-                  <Key className="w-4 h-4" />
-                </Button>
-
                 {/* Clear Chat Button */}
                 <Button
                   variant="ghost"
@@ -439,26 +398,6 @@ export function AIChatbot() {
                 </Button>
               </div>
             </div>
-
-            {/* API Key missing banner */}
-            {!getActiveApiKey() && (
-              <div className="bg-amber-500/15 border-b border-amber-500/30 px-3.5 py-2.5 flex items-center justify-between text-xs text-amber-900 dark:text-amber-200">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                  <span>
-                    Gemini API Key needed. Paste it in <code className="font-mono bg-amber-500/20 px-1 py-0.5 rounded text-[11px]">src/lib/gemini.ts</code> or configure here:
-                  </span>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setShowKeyModal(true)}
-                  className="h-7 text-xs border-amber-500/40 hover:bg-amber-500/20 shrink-0 ml-2"
-                >
-                  Enter Key
-                </Button>
-              </div>
-            )}
 
             {/* Messages Scroll Container */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3.5 scrollbar-thin scrollbar-thumb-muted-foreground/20">
@@ -536,7 +475,7 @@ export function AIChatbot() {
                 );
               })}
 
-              {/* Typing indicator while waiting for Gemini */}
+              {/* Typing indicator while waiting for response */}
               {isLoading && (
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
@@ -636,92 +575,10 @@ export function AIChatbot() {
                   <GripHorizontal className="w-3 h-3 text-muted-foreground/60" />
                   Press <kbd className="px-1 py-0.2 rounded bg-muted border text-[9px]">Enter</kbd> to send
                 </span>
-                <span>Powered by Gemini 3.1 Flash Lite</span>
+                <span>Chef Hub Assistant</span>
               </div>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* API Key Setup Modal */}
-      <AnimatePresence>
-        {showKeyModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl p-6 space-y-4"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                    <Key className="w-4 h-4" />
-                  </div>
-                  <h3 className="font-display font-semibold text-foreground text-base">
-                    Gemini API Key Setup
-                  </h3>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-7 h-7 rounded-full"
-                  onClick={() => setShowKeyModal(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-
-              <div className="text-xs text-muted-foreground space-y-2">
-                <p>
-                  You can paste your API key directly in <code className="font-mono bg-muted px-1.5 py-0.5 rounded text-primary">src/lib/gemini.ts</code> into the <code className="font-mono">GEMINI_API_KEY</code> constant, or paste it below:
-                </p>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground">
-                  Google Gemini API Key
-                </label>
-                <input
-                  type="password"
-                  value={tempApiKey}
-                  onChange={(e) => setTempApiKey(e.target.value)}
-                  placeholder="AIzaSy..."
-                  className="w-full text-xs px-3 py-2 rounded-xl bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary font-mono"
-                />
-              </div>
-
-              <div className="flex items-center justify-between text-xs pt-1">
-                <a
-                  href="https://aistudio.google.com/app/apikey"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline inline-flex items-center gap-1 font-medium text-[11px]"
-                >
-                  Get free key on Google AI Studio
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowKeyModal(false)}
-                  className="text-xs"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSaveApiKey}
-                  className="text-xs bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  Save Key
-                </Button>
-              </div>
-            </motion.div>
-          </div>
         )}
       </AnimatePresence>
     </>

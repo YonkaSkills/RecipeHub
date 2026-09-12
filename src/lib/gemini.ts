@@ -5,16 +5,15 @@
  * Free keys can be created at: https://aistudio.google.com/app/apikey
  */
 
-// >>> PASTE YOUR GEMINI API KEY DIRECTLY HERE <<<
-export const GEMINI_API_KEY = "AQ.Ab8RN6L8-JspgwrihDDfaglbFOwy7XEegUN-FyFCj6ewyADFVw";
+// Load Gemini API Key securely from environment variable
+export const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
 
-// Primary requested model: Gemini 3.1 Flash Lite
-export const PRIMARY_MODEL = "gemini-3.1-flash-lite";
+// Primary default model
+export const PRIMARY_MODEL = "gemini-2.5-flash";
 
-// Fallback models in case the requested model name is not yet active/supported on the API endpoint
+// Fallback models if primary model is unavailable
 export const FALLBACK_MODELS = [
   "gemini-2.5-flash-lite",
-  "gemini-2.0-flash-lite",
   "gemini-2.0-flash",
   "gemini-1.5-flash",
 ];
@@ -83,9 +82,7 @@ export async function sendToGemini(
   const apiKey = (apiKeyOverride || getActiveApiKey()).trim();
 
   if (!apiKey) {
-    throw new Error(
-      "MISSING_API_KEY: Please provide your Gemini API key in src/lib/gemini.ts or enter it in the chatbot settings."
-    );
+    throw new Error("ASSISTANT_UNAVAILABLE");
   }
 
   // Format messages into Gemini API structure
