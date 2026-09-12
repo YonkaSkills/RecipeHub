@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { ThemeProvider } from "@/contexts/ThemeProvider";
+import { AIChatbot } from "@/components/AIChatbot";
 
 
 function NotFoundComponent() {
@@ -143,6 +144,7 @@ function RootComponent() {
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
           <Toaster position="top-right" richColors />
+          <AIChatbot />
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
