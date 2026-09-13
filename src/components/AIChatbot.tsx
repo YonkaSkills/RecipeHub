@@ -13,10 +13,11 @@ import {
   GripHorizontal,
 } from "lucide-react";
 import {
-  sendToGemini,
+  sendToOpenRouter,
   getActiveApiKey,
   type ChatMessage,
-} from "@/lib/gemini";
+} from "@/lib/openrouter";
+import { useAuth } from "@/contexts/AuthProvider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +45,7 @@ const STARTER_PROMPTS = [
 ];
 
 export function AIChatbot() {
+  const { user, loading: authLoading } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -82,7 +84,8 @@ export function AIChatbot() {
     }
   }, [isOpen]);
 
-  if (!mounted) return null;
+  // Only display the chatbot when the user is logged in
+  if (!mounted || authLoading || !user) return null;
 
   const handleSendMessage = async (textToSend?: string) => {
     const query = (textToSend || inputMessage).trim();
@@ -118,7 +121,7 @@ export function AIChatbot() {
     }
 
     try {
-      const response = await sendToGemini(newHistory);
+      const response = await sendToOpenRouter(newHistory);
 
       const botMessage: ChatMessage = {
         id: `bot-${Date.now()}`,
