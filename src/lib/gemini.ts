@@ -6,7 +6,7 @@
  */
 
 // Load Gemini API Key securely from environment variable
-export const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
+export const GEMINI_API_KEY = import.meta.env['VITE_GEMINI_API_KEY'] || "";
 
 // Primary default model
 export const PRIMARY_MODEL = "gemini-2.5-flash";
