@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ChefHat, Loader2 } from "lucide-react";
+import { ChefHat, Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -45,6 +45,7 @@ function AuthPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
   const [pending, setPending] = useState(false);
   const [awaitingConfirm, setAwaitingConfirm] = useState(false);
@@ -65,7 +66,7 @@ function AuthPage() {
         return;
       }
       setPending(true);
-      const { error } = await supabase.auth.resetPasswordForEmail(parsedEmail.data, {
+      const { error } = await supabase.auth.resetPasswordForEmail(parsedEmail.data.toLowerCase(), {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       setPending(false);
@@ -83,7 +84,7 @@ function AuthPage() {
     setPending(true);
     if (mode === "signup") {
       const { data, error } = await supabase.auth.signUp({
-        email: parsed.data.email,
+        email: parsed.data.email.toLowerCase(),
         password: parsed.data.password,
         options: {
           emailRedirectTo: window.location.origin,
@@ -102,11 +103,19 @@ function AuthPage() {
       return;
     }
 
-    const { error } = await supabase.auth.signInWithPassword(parsed.data);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: parsed.data.email.toLowerCase(),
+      password: parsed.data.password,
+    });
     setPending(false);
-    if (error) toast.error(error.message);
-    else toast.success("Welcome back");
-
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Welcome back");
+      if (data.session) {
+        navigate({ to: "/dashboard", replace: true });
+      }
+    }
   }
 
   async function handleGoogle() {
@@ -186,15 +195,30 @@ function AuthPage() {
                   {mode !== "forgot" && (
                     <div className="space-y-2">
                       <Label htmlFor="password">Password</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                      />
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                          required
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="••••••••"
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
                   )}
                   <Button type="submit" className="w-full" disabled={pending}>

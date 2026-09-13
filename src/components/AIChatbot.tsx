@@ -216,7 +216,7 @@ export function AIChatbot() {
           <div key={idx} className="flex items-start space-x-2 my-1 pl-1">
             <span className="font-semibold text-primary text-xs shrink-0">{numberedMatch[1]}.</span>
             <span className="flex-1 text-xs leading-relaxed">
-              {renderInlineMarkdown(numberedMatch[2])}
+              {renderInlineMarkdown(numberedMatch[2] ?? "")}
             </span>
           </div>
         );
